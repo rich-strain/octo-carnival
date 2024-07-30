@@ -91,7 +91,70 @@ const viewAllEmployees = () => {
   );
 };
 
-const addEmployee = () => {};
+const addEmployee = () => {
+  // Get all roles to display as choices
+  db.query('SELECT * FROM role', (err, res) => {
+    if (err) throw err;
+    // create an array of role objects to use as choices
+    const roles = res.rows.map((role) => {
+      return {
+        name: role.title,
+        value: role.id,
+      };
+    });
+    // Get all employees to display as choices
+    db.query('SELECT * FROM employee', (err, res) => {
+      if (err) throw err;
+      // create an array of employee objects to use as choices
+      const employees = res.rows.map((employee) => {
+        return {
+          name: `${employee.first_name} ${employee.last_name}`,
+          value: employee.id,
+        };
+      });
+      // Add a None option to the employees array to allow for employees with no manager
+      employees.unshift({ name: 'None', value: null });
+
+      inquirer
+        .prompt([
+          {
+            type: 'input',
+            name: 'first_name',
+            message: "What is the employee's first name?",
+          },
+          {
+            type: 'input',
+            name: 'last_name',
+            message: "What is the employee's last name?",
+          },
+          {
+            type: 'list',
+            name: 'role_id',
+            message: "What is the employee's role?",
+            choices: roles,
+          },
+          {
+            type: 'list',
+            name: 'manager_id',
+            message: "Who is the employee's manager?",
+            choices: employees,
+          },
+        ])
+        .then((answer) => {
+          // Insert the new employee into the employee table, using $1, $2, $3, $4 as a placeholders to prevent SQL injection
+          db.query(
+            'INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ($1, $2, $3, $4)',
+            [answer.first_name, answer.last_name, answer.role_id, answer.manager_id],
+            (err, res) => {
+              if (err) throw err;
+              console.log(`${answer.first_name} ${answer.last_name} added to the employee table. \n`);
+              mainMenu();
+            }
+          );
+        });
+    });
+  });
+};
 
 // Create New Department
 const addDepartment = () => {
