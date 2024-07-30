@@ -80,7 +80,7 @@ const viewAllRoles = () => {
 // Needs to be fixed - Manager Name is not displaying
 const viewAllEmployees = () => {
   db.query(
-    'SELECT e.id, e.first_name, e.last_name, r.title, r.salary, d.name as department, m.first_name as manager_first_name, m.last_name as manager_last_name FROM employee e JOIN role r ON e.role_id = r.id JOIN department d ON r.department_id = d.id LEFT JOIN employee m ON e.manager_id = m.id;',
+    `SELECT e.id, e.first_name, e.last_name, r.title, d.name as department, r.salary, CONCAT(m.first_name, ' ', m.last_name) AS manager FROM employee e JOIN role r ON e.role_id = r.id JOIN department d ON r.department_id = d.id LEFT JOIN employee m ON e.manager_id = m.id;`,
     (err, res) => {
       if (err) throw err;
       console.table('\n', res.rows);
@@ -91,7 +91,23 @@ const viewAllEmployees = () => {
 
 const addEmployee = () => {};
 
-const addDepartment = () => {};
+const addDepartment = () => {
+  inquirer
+    .prompt([
+      {
+        type: 'input',
+        name: 'department',
+        message: 'Enter the name of the department:',
+      },
+    ])
+    .then((answer) => {
+      db.query('INSERT INTO department (name) VALUES ($1)', [answer.department], (err, res) => {
+        if (err) throw err;
+        console.log(`\n${answer.department} added to the department table.`);
+        mainMenu();
+      });
+    });
+};
 
 const addRole = () => {};
 
