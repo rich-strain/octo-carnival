@@ -24,39 +24,30 @@ function mainMenu() {
         type: 'list',
         name: 'choice',
         message: 'What would you like to do?',
-        choices: [
-          'View all departments',
-          'View all roles',
-          'View all employees',
-          'Add a department',
-          'Add a role',
-          'Add an employee',
-          'Update an employee role',
-          'Exit',
-        ],
+        choices: ['View All Employees', 'Add Employee', 'Update Employee Role', 'View All Roles', 'Add Role', 'View All Departments', 'Add Department', 'Exit'],
       },
     ])
     .then((answer) => {
       switch (answer.choice) {
-        case 'View all departments':
+        case 'View All Departments':
           viewAllDepartments();
           break;
-        case 'View all roles':
+        case 'View All Roles':
           viewAllRoles();
           break;
-        case 'View all employees':
+        case 'View All Employees':
           viewAllEmployees();
           break;
-        case 'Add a department':
+        case 'Add Department':
           addDepartment();
           break;
-        case 'Add a role':
+        case 'Add Role':
           addRole();
           break;
-        case 'Add an employee':
+        case 'Add Employee':
           addEmployee();
           break;
-        case 'Update an employee role':
+        case 'Update Employee Role':
           updateEmployeeRole();
           break;
         case 'Exit':
@@ -85,3 +76,23 @@ const viewAllRoles = () => {
     }
   );
 };
+
+// Needs to be fixed - Manager Name is not displaying
+const viewAllEmployees = () => {
+  db.query(
+    'SELECT e.id, e.first_name, e.last_name, r.title, r.salary, d.name as department, m.first_name as manager_first_name, m.last_name as manager_last_name FROM employee e JOIN role r ON e.role_id = r.id JOIN department d ON r.department_id = d.id LEFT JOIN employee m ON e.manager_id = m.id;',
+    (err, res) => {
+      if (err) throw err;
+      console.table('\n', res.rows);
+      mainMenu();
+    }
+  );
+};
+
+const addEmployee = () => {};
+
+const addDepartment = () => {};
+
+const addRole = () => {};
+
+const updateEmployeeRole = () => {};
