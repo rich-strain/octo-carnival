@@ -208,7 +208,7 @@ const addRole = () => {
         },
       ])
       .then((answer) => {
-        // Insert the new department into the department table, using $1, $2, $3 as a placeholders to prevent SQL injection
+        // Insert the new department into the department table, using $1, $2, $3 as placeholders to prevent SQL injection
         db.query('INSERT INTO role (title, salary, department_id) VALUES ($1, $2, $3)', [answer.title, answer.salary, answer.department_id], (err, res) => {
           if (err) throw err;
           console.log(`${answer.title} added to the role table. \n`);
@@ -218,4 +218,50 @@ const addRole = () => {
   });
 };
 
-const updateEmployeeRole = () => {};
+const updateEmployeeRole = () => {
+  // Get all employees to display as choices
+  db.query('SELECT * FROM employee', (err, res) => {
+    if (err) throw err;
+    // create an array of employee objects to use as choices
+    const employees = res.rows.map((employee) => {
+      return {
+        name: `${employee.first_name} ${employee.last_name}`,
+        value: employee.id,
+      };
+    });
+    // Get all roles to display as choices
+    db.query('SELECT * FROM role', (err, res) => {
+      if (err) throw err;
+      // create an array of role objects to use as choices
+      const roles = res.rows.map((role) => {
+        return {
+          name: role.title,
+          value: role.id,
+        };
+      });
+      inquirer
+        .prompt([
+          {
+            type: 'list',
+            name: 'employee_id',
+            message: 'Select the employee to update:',
+            choices: employees,
+          },
+          {
+            type: 'list',
+            name: 'role_id',
+            message: 'Select the new role for the employee:',
+            choices: roles,
+          },
+        ])
+        .then((answer) => {
+          // Update the employee's role in the employee table, using $1 and $2 as placeholders to prevent SQL injection
+          db.query('UPDATE employee SET role_id = $1 WHERE id = $2', [answer.role_id, answer.employee_id], (err, res) => {
+            if (err) throw err;
+            console.log(`Employee role updated. \n`);
+            mainMenu();
+          });
+        });
+    });
+  });
+};
