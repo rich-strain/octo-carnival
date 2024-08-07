@@ -24,7 +24,17 @@ function mainMenu() {
         type: 'list',
         name: 'choice',
         message: 'What would you like to do?',
-        choices: ['View All Employees', 'Add Employee', 'Update Employee Role', 'View All Roles', 'Add Role', 'View All Departments', 'Add Department', 'Exit'],
+        choices: [
+          'View All Employees',
+          'Add Employee',
+          'Update Employee Role',
+          'View All Roles',
+          'Add Role',
+          'View All Departments',
+          'Add Department',
+          'View Department Budget',
+          'Exit',
+        ],
       },
     ])
     .then((answer) => {
@@ -32,6 +42,9 @@ function mainMenu() {
       switch (answer.choice) {
         case 'View All Departments':
           viewAllDepartments();
+          break;
+        case 'View Department Budget':
+          viewDepartmentBudget();
           break;
         case 'View All Roles':
           viewAllRoles();
@@ -65,6 +78,18 @@ const viewAllDepartments = () => {
     console.table('\n', res.rows);
     mainMenu();
   });
+};
+
+// Get the SUM of salaries for all employees in a department
+const viewDepartmentBudget = () => {
+  db.query(
+    `SELECT department.name as department, SUM(role.salary) as budget FROM employee JOIN role ON employee.role_id = role.id JOIN department ON role.department_id = department.id GROUP BY department.name;`,
+    (err, res) => {
+      if (err) throw err;
+      console.table('\n', res.rows);
+      mainMenu();
+    }
+  );
 };
 
 // Display All Roles In The Terminal
